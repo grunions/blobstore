@@ -1,12 +1,13 @@
 package blobstore
 
 import (
-	"compress/gzip"
 	"crypto/sha256"
 	"hash"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/klauspost/pgzip"
 
 	"github.com/miolini/datacounter"
 	"github.com/pkg/errors"
@@ -61,7 +62,7 @@ func NewLocalBlob() (*LocalBlob, error) {
 	blob.pw.Start()
 
 	blob.ccw = datacounter.NewWriterCounter(blob.File)
-	blob.gw, _ = gzip.NewWriterLevel(blob.ccw, gzip.BestCompression)
+	blob.gw, _ = pgzip.NewWriterLevel(blob.ccw, pgzip.BestCompression)
 	blob.ucw = datacounter.NewWriterCounter(blob.gw)
 	blob.hw = sha256.New()
 	blob.mw = io.MultiWriter(blob.ucw, blob.hw, blob.pw)
