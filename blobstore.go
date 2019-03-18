@@ -153,3 +153,28 @@ func (s3 *S3) UploadDir(src string) ([]byte, error) {
 
 	return blob.Hash(), nil
 }
+
+// Get returns a ReaderAt, Seeker, Closer compatible object
+func (s3 *S3) Get(blobhash []byte) (*minio.Object, int64, error) {
+	client := s3.getClient()
+
+	remoteFilename := fmt.Sprintf("blob/%x.gz", blobhash)
+
+	obj, err := client.GetObject(s3.config.Bucket, remoteFilename, minio.GetObjectOptions{})
+
+	info, err := obj.Stat()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return obj, info.Size, nil
+}
+
+// Delete removes a Blob, returns no error if the blob didn't exist.
+func (s3 *S3) Delete(blobhash []byte) error {
+	client := s3.getClient()
+
+	remoteFilename := fmt.Sprintf("blob/%x.gz", blobhash)
+
+	return client.RemoveObject(s3.config.Bucket, remoteFilename)
+}
