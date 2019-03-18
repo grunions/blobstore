@@ -3,7 +3,6 @@ package blobstore
 import (
 	"archive/tar"
 	"archive/zip"
-	"compress/gzip"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/klauspost/pgzip"
 
 	"github.com/pkg/errors"
 )
@@ -80,7 +81,7 @@ func TarDir(src string, writer io.Writer) error {
 // creating the file structure at 'dst' along the way, and writing any files
 func Untargz(dst string, r io.Reader) error {
 
-	gzr, err := gzip.NewReader(r)
+	gzr, err := pgzip.NewReader(r)
 	if err != nil {
 		return err
 	}
